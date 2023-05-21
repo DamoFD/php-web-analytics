@@ -127,6 +127,11 @@ class web_db_manager {
         return $this->connection->query($query);
     }
 
+    // Check if record exists
+    function record_exists($table, $filter){
+        return $this->count($table, $filter) > 0;
+    }
+
     // Create table with given name and fields
     function create_table($name, $keys) {
         $query = "CREATE TABLE IF NOT EXISTS `".$name."` (";
@@ -448,6 +453,7 @@ class web_analytics {
             $ip = $this->anonymize_ip($ip);
             $host = null;
         }
+        if(!$this->db_manager->record_exists('wa_ips', ['ip' => $ip])){
         $this->db_manager->add("wa_ips", [
             "ip" => $ip,
             "host" => $host,
@@ -455,8 +461,9 @@ class web_analytics {
             "isp" => $this->isp
         ]);
         return $ip;
+        }
     }
-    
+
     // Use cookies set by tracking script to get device's unique profile id
     function get_profile() {
         if(!isset($this->c["device_profile"]) && !isset($this->c["browser_profile"])) {
